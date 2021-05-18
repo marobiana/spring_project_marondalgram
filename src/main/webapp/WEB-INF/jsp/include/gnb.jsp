@@ -5,7 +5,7 @@
 <div class="header bg-info d-flex justify-content-between">
 	<%-- logo를 y축으로 .header의 가운데에 위치 --%>
 	<div class="logo d-flex align-items-center">
-		<h1 class="text-white ml-3">Marondalgram</h1>
+		<h1 class="text-white ml-3"><a href="/timeline/timeline_view" class="text-white">Marondalgram</a></h1>
 	</div>
 	<div class="login-info d-flex align-items-end mb-3 mr-5">
 		<%-- session 정보가 있을 때만 출력 --%>

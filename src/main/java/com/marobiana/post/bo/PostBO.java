@@ -1,6 +1,7 @@
 package com.marobiana.post.bo;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.marobiana.common.FileManagerService;
 import com.marobiana.post.dao.PostDAO;
 import com.marobiana.post.model.Post;
+import com.marobiana.timeline.model.Content;
 
 @Service
 public class PostBO {
@@ -23,7 +25,7 @@ public class PostBO {
 	@Autowired
 	private FileManagerService fileManagerService;
 	
-	public List<Post> gettPostList() {
+	public List<Post> getPostList() {
 		return postDAO.selectPostList();
 	}
 	
