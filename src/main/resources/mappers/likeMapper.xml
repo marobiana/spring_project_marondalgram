@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.marobiana.post.dao.LikeDAO">
+	<!-- 좋아요가 존재하는지 여부와 좋아요 수를 가져오는 쿼리로 재활용 -->
+	<select id="selectLikeCountByPostIdOrUserId" parameterType="map" resultType="int">
+		SELECT
+ 			count(1)
+ 		FROM
+ 			`like`
+ 		WHERE
+ 			`postId` = #{postId}
+ 			<if test="userId != null">
+ 			AND `userId` = #{userId}
+ 			</if>
+	</select>
+	
+	<insert id="insertLike" parameterType="map">
+		INSERT INTO `like`
+ 		(
+ 			`postId`
+ 			, `userId`
+ 			, `createdAt`
+ 		)
+ 		VALUES
+ 		(
+ 			#{postId}
+ 			, #{userId}
+ 			, now()
+ 		)
+	</insert>
+	
+	<delete id="deleteLikeByPostIdUserId" parameterType="map">
+		DELETE
+		FROM
+			`like`
+		WHERE
+			postId = #{postId}
+			AND userId = #{userId}
+	</delete>
+
+</mapper>

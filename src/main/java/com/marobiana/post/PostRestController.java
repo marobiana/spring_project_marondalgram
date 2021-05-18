@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.marobiana.post.bo.LikeBO;
 import com.marobiana.post.bo.PostBO;
 
 @RequestMapping("/post")
@@ -23,6 +24,9 @@ public class PostRestController {
 	
 	@Autowired
 	private PostBO postBO;
+	
+	@Autowired
+	private LikeBO likeBO;
 	
 	/**
 	 * 글쓰기 및 이미지 업로드
@@ -54,6 +58,25 @@ public class PostRestController {
 			logger.error("[글쓰기] 글쓰기를 완료하지 못했습니다.");
 		}
 		
+		return result;
+	}
+	
+	@RequestMapping("/like")
+	public Map<String, Object> like(
+			@RequestParam("postId") int postId,
+			HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<>();
+		HttpSession session = request.getSession();
+		Integer userId = (Integer) session.getAttribute("userId");
+		if (userId == null) {
+			result.put("result", "error");
+			logger.error("[좋아요] 로그인 세션이 없습니다.");
+			return result;
+		}
+		
+		likeBO.like(postId, userId);
+		result.put("result", "success");
 		return result;
 	}
 }

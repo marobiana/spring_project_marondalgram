@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.marobiana.comment.bo.CommentBO;
 import com.marobiana.comment.model.Comment;
+import com.marobiana.post.bo.LikeBO;
 import com.marobiana.post.bo.PostBO;
 import com.marobiana.post.model.Post;
 import com.marobiana.timeline.model.Content;
@@ -20,7 +21,10 @@ public class ContentBO {
 	@Autowired
 	private CommentBO commentBO;
 	
-	public List<Content> getContentList() {
+	@Autowired
+	private LikeBO likeBO;
+	
+	public List<Content> getContentList(Integer userId) {
 		List<Content> contentList = new ArrayList<>();
 		
 		// Post 목록
@@ -32,6 +36,12 @@ public class ContentBO {
 			// Post의 댓글 - Comment 목록
 			List<Comment> commentList = commentBO.getCommentList(post.getId());
 			content.setCommentList(commentList);
+			
+			// Post의 좋아요 - Like
+			content.setFilledLike(likeBO.existLike(post.getId(), userId));
+			
+			// Post의 좋아요 수 - Like
+			content.setLikeCount(likeBO.getLikeCountByPostId(post.getId()));
 			
 			contentList.add(content);
 		}

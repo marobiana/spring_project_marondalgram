@@ -57,8 +57,17 @@
 					
 					<%-- 좋아요 --%>
 					<div class="card-like m-3">
-						<a href="#"><img src="https://www.iconninja.com/files/527/809/128/heart-icon.png" width="18px" height="18px"></a>
-						<a href="#">좋아요 11개</a>
+						<a href="#" class="like-btn" data-post-id="${content.post.id}" data-user-id="${userId}">
+							<%-- 좋아요 해제 상태 --%>
+							<c:if test="${content.filledLike eq false}">
+								<img src="https://www.iconninja.com/files/214/518/441/heart-icon.png" width="18px" height="18px">
+							</c:if>
+							<%-- 좋아요 상태 --%>
+							<c:if test="${content.filledLike eq true}">
+								<img src="https://www.iconninja.com/files/527/809/128/heart-icon.png" width="18px" height="18px">
+							</c:if>
+						</a>
+						<a href="#">좋아요 ${content.likeCount}개</a>
 					</div>
 					
 					<%-- 글(Post) --%>
@@ -210,6 +219,37 @@ $(document).ready(function() {
 			type:'POST',
 			url:'/comment/delete',
 			data: {"commentId":commentId},
+			success: function(data) {
+				if (data.result == 'success') {
+					location.reload(); // 새로고침
+				}
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				var errorMsg = jqXHR.responseJSON.status;
+				alert(errorMsg + ":" + textStatus);
+			}
+		});
+	});
+	
+	// 좋아요 버튼 클릭
+	$('.like-btn').on('click', function(e) {
+		e.preventDefault();
+		
+		var postId = $(this).data('post-id');
+		var userId = $(this).data('user-id'); // 로그인 여부 확인 용
+
+		console.log(postId);
+		console.log(userId);
+		
+		if (userId == '') {
+			alert('로그인 후에 이용 가능합니다');
+			return; 
+		}
+		
+		$.ajax({
+			type:'POST',
+			url:'/post/like',
+			data: {"postId":postId}, // userId는 서버의 세션에서 가져올 것이다. 
 			success: function(data) {
 				if (data.result == 'success') {
 					location.reload(); // 새로고침
