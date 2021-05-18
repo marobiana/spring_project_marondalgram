@@ -32,14 +32,14 @@
 		<%-- my: margin 위아래(y축) --%>
 		<div class="timeline-box my-5">
 			<%-- 반복문 --%>
-			<c:forEach var="post" items="${postList}">
+			<c:forEach var="content" items="${contentList}">
 			
 				<%-- 카드 하나하나마다 영역을 border로 나눔 --%>
 				<div class="card border rounded mt-3">
 					
 					<%-- 글쓴이 아이디 및 ... 버튼(삭제) : 이 둘을 한 행에 멀리 떨어뜨려 나타내기 위해 d-flex, between --%>
 					<div class="p-2 d-flex justify-content-between">
-						<span class="font-weight-bold">${post.userName}</span>
+						<span class="font-weight-bold">${content.post.userName}</span>
 						
 						<%-- 클릭할 수 있는 ... 버튼 이미지 --%>
 						<a href="#" class="more-btn">
@@ -50,8 +50,8 @@
 					<%-- 카드 이미지 --%>
 					<div class="card-img">
 						<%-- 이미지가 존재하는 경우에만 노출 --%>
-						<c:if test="${not empty post.imagePath}">
-							<img src="${post.imagePath}" class="w-100" alt="이미지">
+						<c:if test="${not empty content.post.imagePath}">
+							<img src="${content.post.imagePath}" class="w-100" alt="이미지">
 						</c:if>
 					</div>
 					
@@ -63,47 +63,43 @@
 					
 					<%-- 글(Post) --%>
 					<div class="card-post m-3">
-						<span class="font-weight-bold">${post.userName}</span> 
+						<span class="font-weight-bold">${content.post.userName}</span> 
 						<span>
-							${post.content}
+							${content.post.content}
 						</span>
 					</div>
 					
 					<%-- 댓글(Comment) --%>
 					
-					<%-- "댓글" --%>
-					<div class="card-comment-desc border-bottom">
-						<div class="ml-3 mb-1 font-weight-bold">댓글</div>
-					</div>
-					<div class="card-comment-list m-2">
-						<%-- 댓글 목록 --%>
-						<div class="card-comment m-1">
-							<span class="font-weight-bold">hagulu : </span>
-							<span> 분류가 잘 되었군요~</span>
-							
-							<%-- TODO: 댓글쓴이가 본인이면 삭제버튼 노출 --%>
-							<a href="#" class="commentDelBtn">
-								<img src="https://www.iconninja.com/files/603/22/506/x-icon.png" width="10px" height="10px">
-							</a>
+					<%-- "댓글" - 댓글이 있는 경우에만 댓글 영역 노출 --%>
+					<c:if test="${not empty content.commentList}">
+						<div class="card-comment-desc border-bottom">
+							<div class="ml-3 mb-1 font-weight-bold">댓글</div>
 						</div>
-						
-						<div class="card-comment m-1">
-							<span class="font-weight-bold">jun_coffee : </span>
-							<span> 철이 없었죠 분류를 위해 클러스터를 썼다는게</span>
-							
-							<%-- TODO: 댓글쓴이가 본인이면 삭제버튼 노출 --%>
-							<a href="#" class="commentDelBtn">
-								<img src="https://www.iconninja.com/files/603/22/506/x-icon.png" width="10px" height="10px">
-							</a>
+						<div class="card-comment-list m-2">
+							<%-- 댓글 목록 --%>
+							<c:forEach var="comment" items="${content.commentList}">
+								<div class="card-comment m-1">
+									<span class="font-weight-bold">${comment.userName} : </span>
+									<span>${comment.content}</span>
+									
+									<%-- 댓글쓴이가 본인이면 삭제버튼 노출 --%>
+									<c:if test="${userName eq comment.userName}">
+										<a href="#" class="commentDelBtn" data-comment-id="${comment.id}">
+											<img src="https://www.iconninja.com/files/603/22/506/x-icon.png" width="10px" height="10px">
+										</a>
+									</c:if>
+								</div>
+							</c:forEach>
 						</div>
-					</div>
+					</c:if>
 					
 					<%-- 댓글 쓰기 --%>
 					<%-- 로그인 된 상태에서만 쓸 수 있다. --%>
 					<c:if test="${not empty userId}">
 						<div class="comment-write d-flex border-top mt-2">
-							<input type="text" id="commentText" class="form-control border-0 mr-2" placeholder="댓글 달기"/> 
-							<button type="button" class="btn btn-light commentBtn">게시</button>
+							<input type="text" id="commentText${content.post.id}" class="form-control border-0 mr-2" placeholder="댓글 달기"/> 
+							<button type="button" class="btn btn-light commentBtn" data-post-id="${content.post.id}">게시</button>
 						</div>
 					</c:if>
 				</div>
@@ -160,6 +156,60 @@ $(document).ready(function() {
 			enctype: 'multipart/form-data', // 파일 업로드를 위한 필수 설정
 			processData: false, 			// 파일 업로드를 위한 필수 설정
             contentType: false,				// 파일 업로드를 위한 필수 설정
+			success: function(data) {
+				if (data.result == 'success') {
+					location.reload(); // 새로고침
+				}
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				var errorMsg = jqXHR.responseJSON.status;
+				alert(errorMsg + ":" + textStatus);
+			}
+		});
+	});
+	
+	
+	
+	// 댓글 쓰기
+	$('.commentBtn').on('click', function(e) {
+		e.preventDefault(); // 기본 동작 중단
+		
+		var postId = $(this).data('post-id');
+		//alert(postId);
+		
+		var commentText = $('#commentText' + postId).val().trim(); // 글에 대한 댓글을 가져오기 위해 아이디 뒤에 동적으로 postId를 붙인다.
+		if (commentText.length < 1) {
+			alert("댓글 내용을 입력해주세요.");
+			return;
+		}
+		
+		$.ajax({
+			type:'POST',
+			url:'/comment/create',
+			data: {"postId":postId, "content":commentText},
+			success: function(data) {
+				if (data.result == 'success') {
+					location.reload(); // 새로고침
+				}
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				var errorMsg = jqXHR.responseJSON.status;
+				alert(errorMsg + ":" + textStatus);
+			}
+		});
+	});
+	
+	// 댓글 삭제
+	$('.commentDelBtn').on('click', function(e) {
+		e.preventDefault();
+		
+		var commentId = $(this).data("comment-id");
+		//alert(commentId);
+		
+		$.ajax({
+			type:'POST',
+			url:'/comment/delete',
+			data: {"commentId":commentId},
 			success: function(data) {
 				if (data.result == 'success') {
 					location.reload(); // 새로고침
