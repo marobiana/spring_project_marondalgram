@@ -61,6 +61,12 @@ public class PostRestController {
 		return result;
 	}
 	
+	/**
+	 * 좋아요 / 해제
+	 * @param postId
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping("/like")
 	public Map<String, Object> like(
 			@RequestParam("postId") int postId,
@@ -76,6 +82,25 @@ public class PostRestController {
 		}
 		
 		likeBO.like(postId, userId);
+		result.put("result", "success");
+		return result;
+	}
+	
+	@RequestMapping("/delete")
+	public Map<String, Object> lideleteke(
+			@RequestParam("postId") int postId,
+			HttpServletRequest request) {
+		
+		Map<String, Object> result = new HashMap<>();
+		HttpSession session = request.getSession();
+		Integer userId = (Integer) session.getAttribute("userId");
+		if (userId == null) {
+			result.put("result", "error");
+			logger.error("[글 삭제] 로그인 세션이 없습니다.");
+			return result;
+		}
+		
+		postBO.deletePost(postId);
 		result.put("result", "success");
 		return result;
 	}

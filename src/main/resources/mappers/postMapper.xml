@@ -39,4 +39,27 @@
 			, NOW()
 		)
 	</insert>
+	
+	<select id="selectPost" resultType="com.marobiana.post.model.Post">
+		SELECT
+			`id`
+			, `userId`
+			, `userName`
+			, `content`
+			, `imagePath`
+			, `createdAt`
+			, `updatedAt`
+		FROM
+			`post`
+		WHERE
+			`id` = #{id}
+	</select>
+	
+	<delete id="deletePost" parameterType="int">
+		DELETE
+		FROM
+			`post`
+		WHERE
+			`id` = #{id}
+	</delete>
 </mapper>
